@@ -1,11 +1,12 @@
 /* eslint-disable no-restricted-globals */
 
 const CACHE_NAME = 'count-game-cache-v1';
+// Core assets that must be available offline
+// Note: React build generates hashed filenames; these paths are for basic assets.
+// For full PWA support with hashed assets, consider using Workbox in production.
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/js/main.js',
-  '/static/css/main.css',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-256.png',
@@ -19,9 +20,16 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache).catch((error) => {
-          console.log('Failed to cache some resources:', error);
-        });
+        // Use addAll for required assets, but handle failures gracefully
+        // since some assets may not exist during development
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch((error) => {
+              console.warn(`Failed to cache ${url}:`, error.message);
+              return null;
+            })
+          )
+        );
       })
   );
   self.skipWaiting();
@@ -51,12 +59,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Skip Firebase-related requests to avoid caching dynamic data
+  // Use endsWith for hostname checks to prevent subdomain bypass attacks
   if (
-    url.hostname.includes('firestore.googleapis.com') ||
-    url.hostname.includes('firebase') ||
-    url.hostname.includes('googleapis.com') ||
-    url.pathname.includes('__/auth') ||
-    url.pathname.includes('__/firebase')
+    url.hostname === 'firestore.googleapis.com' ||
+    url.hostname.endsWith('.firestore.googleapis.com') ||
+    url.hostname === 'firebaseio.com' ||
+    url.hostname.endsWith('.firebaseio.com') ||
+    url.hostname === 'firebase.google.com' ||
+    url.hostname.endsWith('.firebase.google.com') ||
+    url.hostname === 'firebaseapp.com' ||
+    url.hostname.endsWith('.firebaseapp.com') ||
+    url.pathname.startsWith('/__/auth') ||
+    url.pathname.startsWith('/__/firebase')
   ) {
     return;
   }
