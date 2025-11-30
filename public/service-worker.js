@@ -51,16 +51,10 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        // Use addAll for required assets, but handle failures gracefully
-        // since some assets may not exist during development
-        return Promise.allSettled(
-          urlsToCache.map(url => 
-            cache.add(url).catch((error) => {
-              console.warn(`Failed to cache ${url}:`, error.message);
-              return null;
-            })
-          )
-        );
+        // Cache assets gracefully - continue even if some fail
+        return cache.addAll(urlsToCache).catch((error) => {
+          console.warn('Some assets failed to cache:', error.message);
+        });
       })
   );
   self.skipWaiting();
@@ -71,13 +65,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
-          }
-          return null;
-        })
+          })
       );
     })
   );

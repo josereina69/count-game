@@ -19,27 +19,25 @@ const db = getFirestore(app);
 // Enable IndexedDB persistence for offline support
 // This is called asynchronously and errors are handled gracefully
 const initializePersistence = async () => {
-  if (db) {
-    try {
-      await enableIndexedDbPersistence(db);
-      console.log('Firestore IndexedDB persistence enabled successfully');
-    } catch (err) {
-      if (err.code === 'failed-precondition') {
-        // Multiple tabs open, persistence can only be enabled in one tab at a time.
-        console.warn(
-          'Firestore persistence failed: Multiple tabs open. ' +
-          'Persistence can only be enabled in one tab at a time.'
-        );
-      } else if (err.code === 'unimplemented') {
-        // The current browser does not support all of the features required for persistence.
-        console.warn(
-          'Firestore persistence failed: Browser does not support IndexedDB persistence.'
-        );
-      } else {
-        console.error('Firestore persistence error:', err);
-      }
-      // Continue without persistence - the app should still work
+  try {
+    await enableIndexedDbPersistence(db);
+    console.log('Firestore IndexedDB persistence enabled successfully');
+  } catch (err) {
+    if (err.code === 'failed-precondition') {
+      // Multiple tabs open, persistence can only be enabled in one tab at a time.
+      console.warn(
+        'Firestore persistence failed: Multiple tabs open. ' +
+        'Persistence can only be enabled in one tab at a time.'
+      );
+    } else if (err.code === 'unimplemented') {
+      // The current browser does not support all of the features required for persistence.
+      console.warn(
+        'Firestore persistence failed: Browser does not support IndexedDB persistence.'
+      );
+    } else {
+      console.error('Firestore persistence error:', err);
     }
+    // Continue without persistence - the app should still work
   }
 };
 
