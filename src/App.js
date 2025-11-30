@@ -10,11 +10,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Enable IndexedDB persistence for offline support
-enableIndexedDbPersistence(db)
-  .then(() => {
+async function initializePersistence() {
+  try {
+    await enableIndexedDbPersistence(db);
     console.log('[Firestore] IndexedDB persistence enabled successfully');
-  })
-  .catch((err) => {
+  } catch (err) {
     if (err.code === 'failed-precondition') {
       // Multiple tabs open - persistence can only be enabled in one tab at a time
       console.warn('[Firestore] Persistence failed: Multiple tabs open. Persistence is only available in one tab at a time.');
@@ -24,7 +24,11 @@ enableIndexedDbPersistence(db)
     } else {
       console.error('[Firestore] Error enabling persistence:', err);
     }
-  });
+  }
+}
+
+// Call the initialization function
+initializePersistence();
 
 function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
