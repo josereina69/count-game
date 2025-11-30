@@ -55,7 +55,7 @@ The app enables IndexedDB persistence for Firestore, which means:
 
 - `public/manifest.json` - PWA manifest configuration
 - `public/icons/` - App icons (192, 256, 384, 512 px)
-- `src/service-worker.js` - Service worker implementation
+- `public/service-worker.js` - Service worker implementation
 - `src/serviceWorkerRegistration.js` - Registration helper
 - `src/index.js` - Service worker registration call
 - `src/App.js` - Firestore persistence initialization
@@ -65,3 +65,9 @@ The app enables IndexedDB persistence for Firestore, which means:
 - The icons included are placeholders. Replace them with your own branded icons for production.
 - The service worker only registers in production builds or on localhost.
 - For best results, test PWA features in an incognito window to avoid cache conflicts.
+
+## Limitations
+
+- This service worker uses a basic caching strategy that caches the app shell and icons.
+- React build assets (JS/CSS with hashed filenames) are cached on-demand during fetch.
+- For more comprehensive offline support with all build assets precached, consider integrating Workbox.

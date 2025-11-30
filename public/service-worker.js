@@ -2,8 +2,10 @@
 
 const CACHE_NAME = 'count-game-cache-v1';
 // Core assets that must be available offline
-// Note: React build generates hashed filenames; these paths are for basic assets.
-// For full PWA support with hashed assets, consider using Workbox in production.
+// These are the essential assets for the app to load.
+// Note: React build generates JS/CSS with hashed filenames (e.g., main.abc123.js).
+// This basic service worker caches the entry points and icons.
+// For full offline support with all build assets, consider using Workbox in production.
 const urlsToCache = [
   '/',
   '/index.html',
@@ -20,16 +22,14 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        // Use addAll for required assets, but handle failures gracefully
-        // since some assets may not exist during development
-        return Promise.allSettled(
-          urlsToCache.map(url => 
-            cache.add(url).catch((error) => {
-              console.warn(`Failed to cache ${url}:`, error.message);
-              return null;
-            })
-          )
-        );
+        // Cache essential assets. If any fail, log a warning but continue.
+        // The fetch handler will cache additional assets on demand.
+        return cache.addAll(urlsToCache).catch((error) => {
+          console.warn('Some assets failed to cache during install:', error.message);
+          // Return resolved to allow the service worker to install
+          // The app shell (index.html) should still work
+          return Promise.resolve();
+        });
       })
   );
   self.skipWaiting();
