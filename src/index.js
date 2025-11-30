@@ -1,19 +1,28 @@
-// Ejemplo de entry que registra el service worker en producción.
-// Si ya tienes un index.js, añade (o merge) las líneas de registro al final.
-// Asegúrate de importar registerServiceWorker y llamarlo solo en producción.
-
+// Main entry point for BarStage PWA
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Si usas el archivo que te di:
-import { registerServiceWorker } from './registerServiceWorker';
+// Service Worker Registration
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 
-// Registrar SW solo en producción (evita interferir con dev server)
-if (process.env.NODE_ENV === 'production') {
-  registerServiceWorker();
-}
+// Register service worker with update notification
+serviceWorkerRegistration.register({
+  onUpdate: (registration) => {
+    console.log('Nueva versión disponible. Recarga la página para actualizar.');
+    // Optionally show a notification to the user
+    if (window.confirm('Hay una nueva versión disponible. ¿Deseas recargar la página?')) {
+      if (registration && registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      window.location.reload();
+    }
+  },
+  onSuccess: () => {
+    console.log('Contenido cacheado para uso offline.');
+  }
+});
