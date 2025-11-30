@@ -63,14 +63,17 @@ self.addEventListener('fetch', (event) => {
   if (
     url.hostname === 'firestore.googleapis.com' ||
     url.hostname.endsWith('.firestore.googleapis.com') ||
+    url.hostname === 'firebasestorage.googleapis.com' ||
+    url.hostname.endsWith('.firebasestorage.googleapis.com') ||
+    url.hostname === 'firebase.googleapis.com' ||
+    url.hostname.endsWith('.firebase.googleapis.com') ||
     url.hostname === 'firebaseio.com' ||
     url.hostname.endsWith('.firebaseio.com') ||
     url.hostname === 'firebase.google.com' ||
     url.hostname.endsWith('.firebase.google.com') ||
     url.hostname === 'firebaseapp.com' ||
     url.hostname.endsWith('.firebaseapp.com') ||
-    url.pathname.startsWith('/__/auth') ||
-    url.pathname.startsWith('/__/firebase')
+    url.pathname.startsWith('/__/')
   ) {
     return;
   }
